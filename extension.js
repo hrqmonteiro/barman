@@ -1,27 +1,25 @@
 const { Gio, St } = imports.gi;
 const { main: Main, panelMenu: PanelMenu } = imports.ui;
+const panel = Main.panel;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const panel = Main.panel;
-
-const a11y = panel.statusArea['a11y'];
-const activitiesButton = panel.statusArea['activities'];
-const appMenu = panel.statusArea['appMenu'];
-const dateMenu = panel.statusArea['dateMenu'];
-const dwellClick = panel.statusArea['dwellClick'];
-const keyboardMenu = panel.statusArea['keyboard'];
-const screenRecording = panel.statusArea['screenRecording'];
-const screenSharing = panel.statusArea['screenSharing'];
-const quickSettings = panel.statusArea['quickSettings'];
-
 const extensionName = Me.metadata.name;
+const { TOGGLE_STATUS } = Me.imports.enums.ToggleStatus;
 
-const TOGGLE_STATUS = {
-  INACTIVE: 0,
-  ACTIVE: 1,
-}
-
+let itemsToHide = [];
+let panelButton = null;
 let toggleStatus = TOGGLE_STATUS.INACTIVE;
+
+// TODO add support to: Unite, logoMenu, Replace Activities, Bluetooth Battery Indicator, Aylur's widgets date and morere
+const excludedPropertyNames = ['a11y', 'activities', 'appMenu', 'dateMenu', 'dwellClick', 'keyboard', 'screenRecording', 'screenSharing'];
+
+const excludedItems = Object.keys(panel.statusArea).reduce((result, key) => {
+  if (excludedPropertyNames.includes(key)) {
+    result.push(panel.statusArea[key]);
+  }
+
+  return result;
+}, []);
 
 const panelBoxs = [
   panel._leftBox.get_children(),
@@ -29,19 +27,16 @@ const panelBoxs = [
   panel._rightBox.get_children()
 ];
 
-const processItems = (items) => {
+function processItems (items) {
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     const child = item.get_child();
 
-    // TODO add support to: Unite, logoMenu, Replace Activities, Bluetooth Battery Indicator, Aylur's widgets date and more
-    if (child !== a11y && child !== activitiesButton && child !== appMenu && child !== dateMenu && child !== dwellClick && child !== keyboardMenu && child !== screenRecording && child !== screenSharing) {
+    if (!excludedItems.includes(child)) {
       itemsToHide.push(child);
     }
   }
 };
-
-let itemsToHide = [];
 
 function toggleItems(items, mode) {
   const action = mode === 'hide' ? 'hide' : 'show';
@@ -52,6 +47,9 @@ function toggleItems(items, mode) {
 }
 
 function toggleBarman() {
+  panelBoxs.forEach(processItems);
+  toggleItems(itemsToHide, 'hide');
+
   if (toggleStatus === TOGGLE_STATUS.INACTIVE) {
     toggleStatus = TOGGLE_STATUS.ACTIVE;
     toggleItems(itemsToHide, 'hide');
@@ -67,12 +65,10 @@ function resetToggleStatus() {
   itemsToHide = [];
 }
 
-let panelButton;
-
 function getPanelButton() {
   panelButton = new PanelMenu.Button(0.0, `${extensionName}`, false);
 
-  let icon = new St.Icon({
+  const icon = new St.Icon({
     icon_name: 'content-loading-symbolic',
     style_class: 'system-status-icon'
   });
@@ -95,7 +91,6 @@ function removeButton() {
 
 function init() {
   log(`initializing ${extensionName}`);
-  panelBoxs.forEach(processItems);
 }
 
 function enable() {
