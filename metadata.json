@@ -3,6 +3,7 @@
   "description": "Extension to hide everything in the panel except for Date Menu and Activities Button to have a clean working panel.",
   "uuid": "barman@hrqmonteiro",
   "url": "https://github.com/hrqmonteiro/barman",
+  "settings-schema": "org.gnome.shell.extensions.barman",
   "shell-version": [
     "44"
   ]

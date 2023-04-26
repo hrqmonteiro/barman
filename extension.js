@@ -6,12 +6,16 @@ const Me = ExtensionUtils.getCurrentExtension();
 const extensionName = Me.metadata.name;
 const { TOGGLE_STATUS } = Me.imports.enums.ToggleStatus;
 
+let icon = null;
 let itemsToHide = [];
 let panelButton = null;
+let Settings = null;
 let toggleStatus = TOGGLE_STATUS.INACTIVE;
 
 // TODO add support to: Unite, logoMenu, Replace Activities, Bluetooth Battery Indicator, Aylur's widgets date and morere
 const excludedPropertyNames = ['a11y', 'activities', 'appMenu', 'dateMenu', 'dwellClick', 'keyboard', 'screenRecording', 'screenSharing'];
+const ClosedIcon = 'closed-symbolic';
+const OpenedIcon = 'opened-symbolic';
 
 const excludedItems = Object.keys(panel.statusArea).reduce((result, key) => {
   if (excludedPropertyNames.includes(key)) {
@@ -46,6 +50,11 @@ function toggleItems(items, mode) {
   }
 }
 
+icon = new St.Icon({
+  gicon: Gio.icon_new_for_string(`${Me.path}/icons/${OpenedIcon}.svg`),
+  style_class: 'system-status-icon'
+});
+
 function toggleBarman() {
   panelBoxs.forEach(processItems);
   toggleItems(itemsToHide, 'hide');
@@ -53,9 +62,11 @@ function toggleBarman() {
   if (toggleStatus === TOGGLE_STATUS.INACTIVE) {
     toggleStatus = TOGGLE_STATUS.ACTIVE;
     toggleItems(itemsToHide, 'hide');
-  } else if (toggleStatus === TOGGLE_STATUS.ACTIVE) {
+    icon.gicon = Gio.icon_new_for_string(`${Me.path}/icons/${ClosedIcon}.svg`)
+  } else if (toggleStatus === TOGGLE_STATUS.ACTIVE) {icon.gicon = Gio.icon_new_for_string(`${Me.path}/icons/${ClosedIcon}.svg`)
     toggleStatus = TOGGLE_STATUS.INACTIVE;
     toggleItems(itemsToHide, 'show');
+    icon.gicon = Gio.icon_new_for_string(`${Me.path}/icons/${OpenedIcon}.svg`)
   }
 }
 
@@ -67,12 +78,6 @@ function resetToggleStatus() {
 
 function getPanelButton() {
   panelButton = new PanelMenu.Button(0.0, `${extensionName}`, false);
-
-  const icon = new St.Icon({
-    icon_name: 'content-loading-symbolic',
-    style_class: 'system-status-icon'
-  });
-
   panelButton.add_child(icon);
   panelButton.connect('button-press-event', toggleBarman);
   return panelButton;
@@ -94,9 +99,15 @@ function init() {
 }
 
 function enable() {
+  Settings = ExtensionUtils.getSettings();
+  Settings.connect('changed::panel-position', () => {
+    removeButton();
+    addButton();
+  })
   addButton();
 }
 
 function disable() {
+  Settings = null;
   removeButton();
 }
