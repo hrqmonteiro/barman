@@ -12,8 +12,8 @@ let panelButton = null;
 let Settings = null;
 let toggleStatus = TOGGLE_STATUS.INACTIVE;
 
-// TODO add support to: Unite, logoMenu, Replace Activities, Bluetooth Battery Indicator, Aylur's widgets date and morere
-const excludedPropertyNames = ['a11y', 'activities', 'appMenu', 'dateMenu', 'dwellClick', 'keyboard', 'screenRecording', 'screenSharing'];
+// TODO add support to: logoMenu, Replace Activities, Bluetooth Battery Indicator, Aylur's widgets date and morere
+const excludedPropertyNames = ['a11y', 'activities', 'appMenu', 'dateMenu', 'dwellClick', 'keyboard', 'screenRecording', 'screenSharing', 'uniteDesktopLabel'];
 const ClosedIcon = 'closed-symbolic';
 const OpenedIcon = 'opened-symbolic';
 
@@ -67,15 +67,6 @@ function toggleBarman() {
       toggleBarman();
     }, 10000)
   }
-}
-
-if (toggleStatus = TOGGLE_STATUS.ACTIVE) {
-  toggleStatus = TOGGLE_STATUS.INACTIVE;
-  toggleItems(itemsToHide, 'hide');
-
-  setTimeout(_ => {
-    toggleBarman();
-  }, 10000)
 }
 
 function resetToggleStatus() {
