@@ -9,17 +9,13 @@ const panel = Main.panel;
 const ClosedIcon = 'closed-symbolic';
 const OpenedIcon = 'opened-symbolic';
 
-let icon = new St.Icon({
-  gicon: Gio.icon_new_for_string(`${Me.path}/icons/${OpenedIcon}.svg`),
-  style_class: 'system-status-icon'
-});;
+let icon = null;
 let itemsToHide = [];
 let panelButton = null;
-let Settings = null;
 let toggleStatus = TOGGLE_STATUS.INACTIVE;
 
 // TODO add support to: logoMenu, Replace Activities, Bluetooth Battery Indicator, Aylur's widgets date and morere
-const excludedPropertyNames = ['a11y', 'activities', 'appMenu', 'dateMenu', 'dwellClick', 'keyboard', 'screenRecording', 'screenSharing', 'uniteDesktopLabel'];
+const excludedPropertyNames = ['a11y', 'activities', 'appMenu', 'dateMenu', 'dwellClick', 'keyboard', 'menuButton', 'screenRecording', 'screenSharing', 'uniteDesktopLabel'];
 
 const excludedItems = Object.keys(panel.statusArea).reduce((result, key) => {
   if (excludedPropertyNames.includes(key)) {
@@ -43,9 +39,12 @@ function processLeftBox() {
   for (let i = 0; i < leftBox.length; i++) {
     const item = leftBox[i];
     const child = item.get_child();
-
     
-    if (!excludedItems.includes(child) && child !== panel.statusArea['barmanButton']) {
+    if (!excludedItems.includes(child)
+          && child !== panel.statusArea['barmanButton']
+          && child !== panel.statusArea['menuButton']
+          && !String(child).includes('ActivitiesButton')
+        ) {
       itemsToHide.push(child);
     }
   }
@@ -58,8 +57,11 @@ function processCenterBox() {
     const item = centerBox[i];
     const child = item.get_child();
 
-    
-    if (!excludedItems.includes(child) && child !== panel.statusArea['barmanButton']) {
+    if (!excludedItems.includes(child)
+          && child !== panel.statusArea['barmanButton']
+          && child !== panel.statusArea['menuButton']
+          && !String(child).includes('ActivitiesButton')
+        ) {
       itemsToHide.push(child);
     }
   }
@@ -71,9 +73,12 @@ function processRightBox() {
   for (let i = 0; i < rightBox.length; i++) {
     const item = rightBox[i];
     const child = item.get_child();
-
     
-    if (!excludedItems.includes(child) && child !== panel.statusArea['barmanButton']) {
+    if (!excludedItems.includes(child)
+          && child !== panel.statusArea['barmanButton']
+          && child !== panel.statusArea['menuButton']
+          && !String(child).includes('ActivitiesButton')
+        ) {
       itemsToHide.push(child);
     }
   }
@@ -122,9 +127,17 @@ function removeButton() {
 
 function init() {
   log(`initializing ${extensionName}`);
+  icon = new St.Icon({
+    gicon: Gio.icon_new_for_string(`${Me.path}/icons/${OpenedIcon}.svg`),
+    style_class: 'system-status-icon'
+  });;
 }
 
 function enable() {
+  icon = new St.Icon({
+    gicon: Gio.icon_new_for_string(`${Me.path}/icons/${OpenedIcon}.svg`),
+    style_class: 'system-status-icon'
+  });;
   addButton();
 }
 
