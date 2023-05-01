@@ -14,7 +14,6 @@ let itemsToHide = [];
 let panelButton = null;
 let toggleStatus = TOGGLE_STATUS.INACTIVE;
 
-// TODO add support to: logoMenu, Replace Activities, Bluetooth Battery Indicator, Aylur's widgets date and morere
 const excludedPropertyNames = ['a11y', 'activities', 'appMenu', 'dateMenu', 'dwellClick', 'keyboard', 'menuButton', 'screenRecording', 'screenSharing', 'uniteDesktopLabel'];
 
 const excludedItems = Object.keys(panel.statusArea).reduce((result, key) => {
