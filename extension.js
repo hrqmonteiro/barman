@@ -14,79 +14,68 @@ let itemsToHide = [];
 let panelButton = null;
 let toggleStatus = TOGGLE_STATUS.INACTIVE;
 
-const excludedPropertyNames = ['a11y', 'activities', 'appMenu', 'dateMenu', 'dwellClick', 'keyboard', 'menuButton', 'screenRecording', 'screenSharing', 'uniteDesktopLabel'];
+function keepCondition(child) {
+  // TODO add support to Bluetooth Battery Indicator, AppIndicator and more
+  const excluded = [
+    'a11y',
+    'activities',
+    'appMenu',
+    'barmanButton',
+    'dateMenu',
+    'dwellClick',
+    'keyboard',
+    'menuButton',
+    'screenRecording',
+    'screenSharing',
+    'uniteDesktopLabel'
+  ]
 
-const excludedItems = Object.keys(panel.statusArea).reduce((result, key) => {
-  if (excludedPropertyNames.includes(key)) {
-    result.push(panel.statusArea[key]);
+  const excludedItems = Object.keys(panel.statusArea).reduce((result, key) => {
+    if (excluded.includes(key)) {
+      result.push(panel.statusArea[key]);
+    }
+
+    return result;
+  }, []);
+
+  return child
+    && !excludedItems.includes(child)
+    && !String(child).includes('ActivitiesButton')
+}
+
+const boxes = [
+  panel._leftBox,
+  panel._centerBox,
+  panel._rightBox
+];
+
+function processBoxes(boxes) {
+  for (let i = 0; i < boxes.length; i++) {
+    const box = boxes[i];
+    const children = box.get_children();
+
+    for (let j = 0; j < children.length; j++) {
+      const item = children[j];
+      const child = item.get_child();
+
+      if (keepCondition(child)) {
+        itemsToHide.push(child);
+      }
+    }
   }
-
-  return result;
-}, []);
+}
 
 function toggleItems(items, mode) {
   const action = mode === 'hide' ? 'hide' : 'show';
+
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     item[action]();
   }
 }
 
-function processLeftBox() {
-  const leftBox = panel._leftBox.get_children();
-
-  for (let i = 0; i < leftBox.length; i++) {
-    const item = leftBox[i];
-    const child = item.get_child();
-    
-    if (!excludedItems.includes(child)
-          && child !== panel.statusArea['barmanButton']
-          && child !== panel.statusArea['menuButton']
-          && !String(child).includes('ActivitiesButton')
-        ) {
-      itemsToHide.push(child);
-    }
-  }
-}
-
-function processCenterBox() {
-  const centerBox = panel._centerBox.get_children();
-
-  for (let i = 0; i < centerBox.length; i++) {
-    const item = centerBox[i];
-    const child = item.get_child();
-
-    if (!excludedItems.includes(child)
-          && child !== panel.statusArea['barmanButton']
-          && child !== panel.statusArea['menuButton']
-          && !String(child).includes('ActivitiesButton')
-        ) {
-      itemsToHide.push(child);
-    }
-  }
-}
-
-function processRightBox() {
-  const rightBox = panel._rightBox.get_children();
-
-  for (let i = 0; i < rightBox.length; i++) {
-    const item = rightBox[i];
-    const child = item.get_child();
-    
-    if (!excludedItems.includes(child)
-          && child !== panel.statusArea['barmanButton']
-          && child !== panel.statusArea['menuButton']
-          && !String(child).includes('ActivitiesButton')
-        ) {
-      itemsToHide.push(child);
-    }
-  }
-}
-
 function toggleBarman() {
-  processLeftBox();
-  processCenterBox();
-  processRightBox();
+  processBoxes(boxes);
   toggleItems(itemsToHide, 'hide');
 
   if (toggleStatus === TOGGLE_STATUS.INACTIVE) {
@@ -107,6 +96,11 @@ function resetToggleStatus() {
 }
 
 function getPanelButton() {
+  icon = new St.Icon({
+    gicon: Gio.icon_new_for_string(`${Me.path}/icons/${OpenedIcon}.svg`),
+    style_class: 'system-status-icon'
+  });;
+
   panelButton = new PanelMenu.Button(0.0, `${extensionName}`, false);
   panelButton.add_child(icon);
   panelButton.connect('button-press-event', toggleBarman);
@@ -114,10 +108,6 @@ function getPanelButton() {
 }
 
 function addButton() {
-  icon = new St.Icon({
-    gicon: Gio.icon_new_for_string(`${Me.path}/icons/${OpenedIcon}.svg`),
-    style_class: 'system-status-icon'
-  });;
   panel.addToStatusArea('barmanButton', getPanelButton(), 99);
 }
 
