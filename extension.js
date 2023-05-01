@@ -115,6 +115,10 @@ function getPanelButton() {
 }
 
 function addButton() {
+  icon = new St.Icon({
+    gicon: Gio.icon_new_for_string(`${Me.path}/icons/${OpenedIcon}.svg`),
+    style_class: 'system-status-icon'
+  });;
   panel.addToStatusArea('barmanButton', getPanelButton(), 99);
 }
 
@@ -127,17 +131,9 @@ function removeButton() {
 
 function init() {
   log(`initializing ${extensionName}`);
-  icon = new St.Icon({
-    gicon: Gio.icon_new_for_string(`${Me.path}/icons/${OpenedIcon}.svg`),
-    style_class: 'system-status-icon'
-  });;
 }
 
 function enable() {
-  icon = new St.Icon({
-    gicon: Gio.icon_new_for_string(`${Me.path}/icons/${OpenedIcon}.svg`),
-    style_class: 'system-status-icon'
-  });;
   addButton();
 }
 
