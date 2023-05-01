@@ -4,7 +4,5 @@
   "uuid": "barman@hrqmonteiro",
   "url": "https://github.com/hrqmonteiro/barman",
   "settings-schema": "org.gnome.shell.extensions.barman",
-  "shell-version": [
-    "44"
-  ]
+  "shell-version": ["44"]
 }
